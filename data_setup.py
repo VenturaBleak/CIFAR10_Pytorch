@@ -40,7 +40,7 @@ def get_readers1(train_indices=None):
     train_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=True,  # get training data
-        download=False,  # download data if it doesn't exist on disk
+        download=True,  # download data if it doesn't exist on disk
         transform=transforms.ToTensor()  # images come as PIL format, we want to turn into Torch tensors
     )
 
@@ -48,7 +48,7 @@ def get_readers1(train_indices=None):
     test_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=False,  # get test data
-        download=False,  # download data if it doesn't exist on disk
+        download=True,  # download data if it doesn't exist on disk
         transform=transforms.ToTensor()  # images come as PIL format, we want to turn into Torch tensors
     )
     # Get class names to idx mapping
@@ -110,7 +110,7 @@ def get_readers2(train_transform, test_transform, train_indices=None):
     train_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=True,  # get training data
-        download=True,  # download data if it doesn't exist on disk
+        download=False,  # download data if it doesn't exist on disk
         transform=train_transform
     )
 
@@ -118,7 +118,7 @@ def get_readers2(train_transform, test_transform, train_indices=None):
     test_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=False,  # get test data
-        download=True,  # download data if it doesn't exist on disk
+        download=False,  # download data if it doesn't exist on disk
         transform=test_transform
     )
 
