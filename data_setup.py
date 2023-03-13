@@ -15,7 +15,7 @@ def num_workers(device='cpu'):
     """
 
     if str(device) != 'cpu':
-        NUM_WORKERS = max(1, int((os.cpu_count())/2))
+        NUM_WORKERS = max(2, int((os.cpu_count())/2))
     else:
         NUM_WORKERS = 0
     print('Number of workers:', NUM_WORKERS)
