@@ -20,7 +20,7 @@ batch_size = 32
 augment = True
 validation_fraction = 0.1
 # Model hyperparameters
-num_epochs = 12
+num_epochs = 5
 model_name = 'NiN'
 pretrained = True
 optimizer_choice = 'SGD'
@@ -49,8 +49,8 @@ else:
 # https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling
 if scheduler_choice == 'cyclic':
     # scheduler hyperparams
-    base_lr = 0.01
-    max_lr = 0.03
+    base_lr = 0.00005
+    max_lr = 0.001
     step_size_up = 5
     mode = 'triangular2'
     gamma = 0.90
