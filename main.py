@@ -70,15 +70,18 @@ test_transform = transforms.Compose([
 ])
 #%%
 # Load data
-train_reader, test_reader = get_readers2(train_transform=train_transform_trivial_augment,
-                                         test_transform=test_transform,
-                                         train_indices=train_indices)
+train_reader_aug, train_reader, test_reader = get_readers2(train_transform=train_transform_trivial_augment,
+                                                           test_transform=test_transform,
+                                                           train_indices=train_indices)
 
-train_loader, test_loader = get_loaders(batch_size, device, train_reader, test_reader)
-
+train_loader_aug, train_loader, test_loader = get_loaders(batch_size=batch_size,
+                                                          device=device,
+                                                          train_reader_aug = train_reader_aug,
+                                                          train_reader=train_reader,
+                                                          test_reader=test_reader)
 #%%
 # Checking the dataset
-images, labels = next(iter(train_loader))
+images, labels = next(iter(train_loader_aug))
 print('Image batch dimensions:', images.shape)
 print('Image label dimensions:', labels.shape)
 #%%
@@ -101,6 +104,7 @@ plt.show();
 from engine import train_classifier_simple_v1
 log_dict = train_classifier_simple_v1(num_epochs=num_epochs,
                                         model=model,
+                                        train_loader_aug=train_loader_aug,
                                         train_loader=train_loader,
                                         test_loader=test_loader,
                                         optimizer=optimizer,
