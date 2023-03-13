@@ -130,7 +130,7 @@ def get_readers2(train_transform, test_transform, train_indices=None):
     )
 
     if train_indices is not None:
-        train_reader_aug = Subset(train_reader, train_indices)
+        train_reader_aug = Subset(train_reader_aug, train_indices)
         train_reader = Subset(train_reader, train_indices)
         test_reader = Subset(test_reader, train_indices)
 

@@ -17,11 +17,19 @@ print('Device:', device)
 # Hyperparameters
 random_seed = 42
 learning_rate = 0.001
-num_epochs = 2
+num_epochs = 9
 batch_size = 32
 model_name = 'NiN'
 pretrained = True
-GRAYSCALE = False
+optimizer_choice = 'Adam'
+scheduler_choice = 'cyclic'
+augment = True
+lr = 0.01
+base_lr= 0.005
+max_lr = 0.01
+step_size_up = 3
+mode="exp_range"
+gamma=0.85
 #%%
 # to reduce training time, set train_indices to a subset of the training data
 # https://github.com/rasbt/deeplearning-models/blob/master/pytorch_ipynb/cnn/nin-cifar10_batchnorm.ipynb
@@ -30,7 +38,7 @@ if str(device) != 'cpu':
     train_indices = None
 else:
     # subset of training data
-    train_indices = torch.arange(0, 1000)
+    train_indices = torch.arange(0, 100)
 #%%
 # get data sets and classes_to_idx
 train_reader, test_reader, classes_to_idx = get_readers1(train_indices=train_indices)
@@ -50,27 +58,56 @@ torch.manual_seed(random_seed)
 model, resolution = model_choice(model_name, pretrained, num_classes)
 model = model.to(device)
 #%%
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+# Create optimizer and scheduler
+if optimizer_choice == 'SGD':
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+elif optimizer_choice == 'Adam':
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    cycle_momentum = False
+else:
+    raise ValueError('Optimizer_choice not supported')
+
+#%%
+### Scheduler
+# https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling
+if scheduler_choice == 'cyclic':
+    scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer,
+                                                  base_lr=base_lr,
+                                                  max_lr=max_lr,
+                                                  step_size_up=step_size_up,
+                                                  mode=mode,
+                                                  gamma=gamma,
+                                                  cycle_momentum=cycle_momentum)
+elif scheduler_choice == None:
+    scheduler = None
+else:
+    raise ValueError('Scheduler_choice not supported')
 #%%
 # inspect model
 summary(model, input_size=[1, 3, resolution, resolution])
 #%%
 # Create training transform with TrivialAugment
-train_transform_trivial_augment = transforms.Compose([
-    transforms.Resize((resolution, resolution)),
-    transforms.TrivialAugmentWide(num_magnitude_bins=6),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=train_mean, std=train_std)
-])
 # Create testing transform (no data augmentation)
 test_transform = transforms.Compose([
     transforms.Resize((resolution, resolution)),
     transforms.ToTensor(),
     transforms.Normalize(mean=train_mean, std=train_std)
 ])
+
+if augment == True:
+    train_transform = transforms.Compose([
+        transforms.Resize((resolution, resolution)),
+        transforms.TrivialAugmentWide(num_magnitude_bins=6),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=train_mean, std=train_std)
+    ])
+    print('TrivialAugmentWide applied')
+else:
+    train_transform = test_transform
+
 #%%
 # Load data
-train_reader_aug, train_reader, test_reader = get_readers2(train_transform=train_transform_trivial_augment,
+train_reader_aug, train_reader, test_reader = get_readers2(train_transform=train_transform,
                                                            test_transform=test_transform,
                                                            train_indices=train_indices)
 
@@ -103,63 +140,20 @@ plt.show();
 #%%
 from engine import train_classifier_simple_v1
 log_dict = train_classifier_simple_v1(num_epochs=num_epochs,
-                                        model=model,
-                                        train_loader_aug=train_loader_aug,
-                                        train_loader=train_loader,
-                                        test_loader=test_loader,
-                                        optimizer=optimizer,
-                                        device=device)
+                                      model=model,
+                                      scheduler=scheduler,
+                                      train_loader_aug=train_loader_aug,
+                                      train_loader=train_loader,
+                                      test_loader=test_loader,
+                                      optimizer=optimizer,
+                                      device=device)
 
-# #
-# from eval import compute_accuracy
-# import time
-# start_time = time.time()
-# for epoch in range(num_epochs):
-#
-#     model.train()
-#
-#     for batch_idx, (features, targets) in enumerate(train_loader):
-#
-#         ### PREPARE MINIBATCH
-#         features = features.to(device)
-#         targets = targets.to(device)
-#
-#         ### FORWARD AND BACK PROP
-#         logits, probas = model(features)
-#         loss = F.cross_entropy(logits, targets)
-#         optimizer.zero_grad()
-#
-#         loss.backward()
-#
-#         ### UPDATE MODEL PARAMETERS
-#         optimizer.step()
-#
-#         ### LOGGING
-#         if batch_idx % int(len(train_loader)*(1/5)) == 0:
-#             print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} | '
-#                   f'Batch {batch_idx:03d}/{len(train_loader):03d} |'
-#                   f' Loss: {loss:.4f}')
-#
-#     # no need to build the computation graph for backprop when computing accuracy
-#     with torch.set_grad_enabled(False):
-#         train_acc = compute_accuracy(model, train_loader, device=device)
-#         print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} Train Acc.: {train_acc:.2f}%')
-#
-#     elapsed = (time.time() - start_time) / 60
-#     print(f'Time elapsed: {elapsed:.2f} min')
-#
-# elapsed = (time.time() - start_time) / 60
-# print(f'Total Training Time: {elapsed:.2f} min')
-# #%%
-# # test
-# with torch.set_grad_enabled(False):
-#     test_acc = compute_accuracy(model, test_loader, device=device)
-#     print(f'Test Accuracy: {test_acc:.2f}%')
-#
-# # the above code gives the following error message: line 197, in backward
-# #     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-# # your task is to re-write the code from above to fix this error message
-#
-# start_time = time.time()
-# for epoch in range(num_epochs):
-#     pass
+#%%
+### Evaluate the model
+
+
+# plot values of learning rate key in log_dict
+plt.plot(range(0, len(log_dict['learning_rate_per_epoch'])),log_dict['learning_rate_per_epoch'])
+plt.xlabel('Epoch')
+plt.ylabel('Learning Rate')
+plt.show()
