@@ -8,20 +8,20 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 
-def num_workers(device):
+def num_workers(device='cpu'):
     """
     Returns the number of workers to use for the DataLoader.
     :return:
     """
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if device == 'cuda':
-        NUM_WORKERS = os.cpu_count()
-        return NUM_WORKERS
+
+    if str(device) != 'cpu':
+        NUM_WORKERS = max(1, int((os.cpu_count())/2))
     else:
         NUM_WORKERS = 0
-        return NUM_WORKERS
+    print('Number of workers:', NUM_WORKERS)
+    return NUM_WORKERS
 
-def get_datasets(train_indices=None):
+def get_readers1(train_indices=None):
     """
     Loads the CIFAR10 dataset and calculates the mean and standard deviation of the training data.
 
@@ -37,28 +37,28 @@ def get_datasets(train_indices=None):
     https://github.com/rasbt/deeplearning-models/blob/master/pytorch_ipynb/cnn/cnn-standardized.ipynb
     """
     # Setup training data
-    train_dataset = datasets.CIFAR10(
+    train_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=True,  # get training data
-        download=True,  # download data if it doesn't exist on disk
+        download=False,  # download data if it doesn't exist on disk
         transform=transforms.ToTensor()  # images come as PIL format, we want to turn into Torch tensors
     )
 
     # Setup test data
-    test_dataset = datasets.CIFAR10(
+    test_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=False,  # get test data
-        download=True,  # download data if it doesn't exist on disk
+        download=False,  # download data if it doesn't exist on disk
         transform=transforms.ToTensor()  # images come as PIL format, we want to turn into Torch tensors
     )
     # Get class names to idx mapping
-    classes_to_idx = train_dataset.class_to_idx
+    classes_to_idx = train_reader.class_to_idx
 
     if train_indices is not None:
-        train_dataset = Subset(train_dataset, train_indices)
-        test_dataset = Subset(test_dataset, train_indices)
+        train_reader = Subset(train_reader, train_indices)
+        test_reader = Subset(test_reader, train_indices)
 
-    return train_dataset, test_dataset, classes_to_idx
+    return train_reader, test_reader, classes_to_idx
 
 def train_mean_std(train_dataset, batch_size=32):
     """
@@ -72,8 +72,10 @@ def train_mean_std(train_dataset, batch_size=32):
                               batch_size=batch_size,
                               num_workers=0,
                               shuffle=False)
+
     train_mean = []
     train_std = []
+
     for i, image in enumerate(train_loader, 0):
         numpy_image = image[0].numpy()
 
@@ -89,8 +91,7 @@ def train_mean_std(train_dataset, batch_size=32):
     print('Std Dev:', train_std)
     return train_mean, train_std
 
-
-def load_data(batch_size, train_transform, test_transform, train_indices=None, device="cpu"):
+def get_readers2(train_transform, test_transform, train_indices=None):
     """
     Loads the CIFAR10 dataset and creates PyTorch DataLoaders for the training and test data.
 
@@ -105,41 +106,52 @@ def load_data(batch_size, train_transform, test_transform, train_indices=None, d
     Example Usage:
     train_loader, test_loader = load_data(64)
     """
-
-    NUM_WORKERS = num_workers(device)
-
     # Setup training data
-    train_dataset = datasets.CIFAR10(
+    train_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=True,  # get training data
-        download=False,  # download data if it doesn't exist on disk
+        download=True,  # download data if it doesn't exist on disk
         transform=train_transform
     )
 
     # Setup test data
-    test_dataset = datasets.CIFAR10(
+    test_reader = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=False,  # get test data
-        download=False,  # download data if it doesn't exist on disk
+        download=True,  # download data if it doesn't exist on disk
         transform=test_transform
     )
 
     if train_indices is not None:
-        train_dataset = Subset(train_dataset, train_indices)
-        test_dataset = Subset(test_dataset, train_indices)
+        train_reader = Subset(train_reader, train_indices)
+        test_reader = Subset(test_reader, train_indices)
+
+    return train_reader, test_reader
+
+def get_loaders(batch_size, device, train_reader, test_reader):
+    """
+    Creates PyTorch DataLoaders for the training and test data.
+
+    :param batch_size:
+    :param device:
+    :param train_reader:
+    :param test_reader:
+    :return:
+    """
+    NUM_WORKERS = num_workers(device)
 
     # Create data loaders
-    train_loader = DataLoader(dataset=train_dataset,
+    train_loader = DataLoader(dataset=train_reader,
                               batch_size=batch_size,
                               shuffle=True,
                               num_workers= NUM_WORKERS,
                               pin_memory=True)
 
 
-    test_loader = DataLoader(dataset=test_dataset,
+    test_loader = DataLoader(dataset=test_reader,
                              batch_size=batch_size,
                              shuffle=False,
                              num_workers= NUM_WORKERS,
                              pin_memory=True)
 
-    return train_dataset, test_dataset, train_loader, test_loader
+    return train_loader, test_loader
