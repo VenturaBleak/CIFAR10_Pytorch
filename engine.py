@@ -233,9 +233,6 @@ def train_classifier_simple_v2(
                       f'| Best Test '
                       f'(Ep. {best_epoch:03d}): {best_test_acc :.2f}%')
 
-        elapsed = (time.time() - start_time)/60
-        print(f'Epoch Time Elapsed: {elapsed:.2f} min')
-
     elapsed = (time.time() - start_time)/60
     print(f'Total Training Time Elapsed: {elapsed:.2f} min')
 
