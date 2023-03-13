@@ -12,6 +12,7 @@ def train_classifier_simple_v1(num_epochs,
                                train_loader_aug,
                                train_loader,
                                test_loader,
+                               scheduler=None,
                                valid_loader=None,
                                loss_fn=None, logging_interval=100,
                                skip_epoch_stats=False):
@@ -42,7 +43,8 @@ def train_classifier_simple_v1(num_epochs,
                 'valid_acc_per_epoch': [],
                 'valid_loss_per_epoch': [],
                 'test_acc_per_epoch': [],
-                'test_loss_per_epoch': []}
+                'test_loss_per_epoch': [],
+                'learning_rate_per_epoch': []}
 
     # cross entropy loss per default
     if loss_fn is None:
@@ -76,10 +78,15 @@ def train_classifier_simple_v1(num_epochs,
             # LOGGING
             log_dict['train_loss_per_batch'].append(loss.item())
 
-            if batch_idx % int(len(train_loader_aug)*(1/5)) == 0:
+            if batch_idx % max(1,int(len(train_loader_aug)*(1/5))) == 0:
                 print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} | '
-                      f'Batch {batch_idx:03d}/{len(train_loader_aug):03d} |'
+                      f'Batch {batch_idx + 1:03d}/{len(train_loader_aug):03d} |'
                       f' Loss: {loss:.4f}')
+
+        if scheduler is not None:
+            # logging learning rate
+            log_dict['learning_rate_per_epoch'].append(optimizer.param_groups[0]['lr'])
+            scheduler.step()
 
         if not skip_epoch_stats:
             model.eval()
@@ -88,7 +95,7 @@ def train_classifier_simple_v1(num_epochs,
 
                 train_acc = compute_accuracy(model, train_loader, device)
                 train_loss = compute_epoch_loss(model, train_loader, device)
-                print('***Epoch: %03d/%03d | Train. Acc.: %.3f%% | Loss: %.3f' % (
+                print('***Epoch: %03d/%03d | Train. Acc.: %.3f%% | Train Loss: %.3f' % (
                     epoch + 1, num_epochs, train_acc, train_loss))
                 log_dict['train_loss_per_epoch'].append(train_loss.item())
                 log_dict['train_acc_per_epoch'].append(train_acc.item())
