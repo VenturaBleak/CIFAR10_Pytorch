@@ -34,8 +34,7 @@ else:
     train_indices = None
 #%%
 # get data sets and classes_to_idx
-train_dataset, test_dataset, classes_to_idx = get_datasets(batch_size=batch_size,
-                                                           train_indices=train_indices)
+train_dataset, test_dataset, classes_to_idx = get_datasets(train_indices=train_indices)
 # get mean and std
 train_mean, train_std = train_mean_std(train_dataset, batch_size=batch_size)
 #%%
