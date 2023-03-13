@@ -8,15 +8,7 @@ from torchvision import transforms
 
 from data_setup import get_datasets, train_mean_std, load_data
 from models import model_choice
-
 #%%
-try:
-    import torchinfo
-except:
-    !pip install torchinfo
-    import torchinfo
-#%%
-
 # Device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('Device:', device)
@@ -83,7 +75,8 @@ test_transform = transforms.Compose([
 train_dataset, test_dataset, train_loader, test_loader = load_data(batch_size=batch_size,
                                                                    train_transform=train_transform_trivial_augment,
                                                                    test_transform=test_transform,
-                                                                   train_indices=train_indices)
+                                                                   train_indices=train_indices,
+                                                                   device=device)
 #%%
 # Checking the dataset
 images, labels = next(iter(train_loader))

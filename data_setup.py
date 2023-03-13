@@ -2,13 +2,24 @@
 Contains functionality for creating PyTorch DataLoaders for
 image classification data.
 """
-
+import os
 import numpy as np
 import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 
-NUM_WORKERS = 0
+def num_workers(device):
+    """
+    Returns the number of workers to use for the DataLoader.
+    :return:
+    """
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device == 'cuda':
+        NUM_WORKERS = os.cpu_count()
+        return NUM_WORKERS
+    else:
+        NUM_WORKERS = 0
+        return NUM_WORKERS
 
 def get_datasets(train_indices=None):
     """
@@ -79,7 +90,7 @@ def train_mean_std(train_dataset, batch_size=32):
     return train_mean, train_std
 
 
-def load_data(batch_size, train_transform, test_transform, train_indices=None):
+def load_data(batch_size, train_transform, test_transform, train_indices=None, device="cpu"):
     """
     Loads the CIFAR10 dataset and creates PyTorch DataLoaders for the training and test data.
 
@@ -94,6 +105,8 @@ def load_data(batch_size, train_transform, test_transform, train_indices=None):
     Example Usage:
     train_loader, test_loader = load_data(64)
     """
+
+    NUM_WORKERS = num_workers(device)
 
     # Setup training data
     train_dataset = datasets.CIFAR10(
