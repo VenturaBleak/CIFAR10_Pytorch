@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, Subset
 
 NUM_WORKERS = 0
 
-def train_mean_std(batch_size=32, train_indices=None):
+def get_datasets(batch_size=32, train_indices=None):
     """
     Loads the CIFAR10 dataset and calculates the mean and standard deviation of the training data.
 
@@ -45,15 +45,24 @@ def train_mean_std(batch_size=32, train_indices=None):
 
     if train_indices is not None:
         train_dataset = Subset(train_dataset, train_indices)
+        test_dataset = Subset(test_dataset, train_indices)
+
+    return train_dataset, test_dataset, classes_to_idx
+
+def train_mean_std(train_dataset, batch_size=32):
+    """
+    Calculates the mean and standard deviation of the training data.
+    :param train_dataset:
+    :param batch_size:
+    :return:
+    """
 
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=batch_size,
-                              num_workers = 0,
-                              shuffle = False)
-
+                              num_workers=0,
+                              shuffle=False)
     train_mean = []
     train_std = []
-
     for i, image in enumerate(train_loader, 0):
         numpy_image = image[0].numpy()
 
@@ -62,15 +71,13 @@ def train_mean_std(batch_size=32, train_indices=None):
 
         train_mean.append(batch_mean)
         train_std.append(batch_std)
-
     train_mean = torch.tensor(np.mean(train_mean, axis=0))
     train_std = torch.tensor(np.mean(train_std, axis=0))
-
     # convert mean and std to tuple
     print('Mean:', train_mean)
     print('Std Dev:', train_std)
+    return train_mean, train_std
 
-    return train_mean, train_std, classes_to_idx
 
 def load_data(batch_size, train_transform, test_transform, train_indices=None):
     """
@@ -122,4 +129,4 @@ def load_data(batch_size, train_transform, test_transform, train_indices=None):
                              num_workers= NUM_WORKERS,
                              pin_memory=True)
 
-    return train_loader, test_loader
+    return train_dataset, test_dataset, train_loader, test_loader

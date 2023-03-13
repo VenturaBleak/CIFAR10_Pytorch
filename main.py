@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from torchinfo import summary
 from torchvision import transforms
 
-from data_setup import train_mean_std
+from data_setup import get_datasets, train_mean_std, load_data
 
 # Device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -28,11 +28,11 @@ GRAYSCALE = False
 # train_indices = None
 train_indices = torch.arange(0, 1000)
 #%%
-# get standard mean and std for training data
-
-train_mean, train_std, classes_to_idx = train_mean_std(batch_size=batch_size,
-                                                       train_indices=train_indices)
-
+# get data sets and classes_to_idx
+train_dataset, test_dataset, classes_to_idx = get_datasets(batch_size=batch_size,
+                                                           train_indices=train_indices)
+# get mean and std
+train_mean, train_std = train_mean_std(train_dataset, batch_size=batch_size)
 #%%
 # get num classes
 num_classes = len(classes_to_idx.keys())
@@ -67,11 +67,10 @@ test_transform = transforms.Compose([
 ])
 #%%
 # Load data
-from data_setup import load_data
-train_loader, test_loader = load_data(batch_size=batch_size,
-                                      train_transform = train_transform_trivial_augment,
-                                      test_transform = test_transform,
-                                      train_indices=train_indices)
+train_dataset, test_dataset, train_loader, test_loader = load_data(batch_size=batch_size,
+                                                                   train_transform=train_transform_trivial_augment,
+                                                                   test_transform=test_transform,
+                                                                   train_indices=train_indices)
 #%%
 # Checking the dataset
 images, labels = next(iter(train_loader))
