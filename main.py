@@ -7,6 +7,15 @@ from torchinfo import summary
 from torchvision import transforms
 
 from data_setup import get_datasets, train_mean_std, load_data
+from models import model_choice
+
+#%%
+try:
+    import torchinfo
+except:
+    !pip install torchinfo
+    import torchinfo
+#%%
 
 # Device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -25,8 +34,12 @@ GRAYSCALE = False
 #%%
 # to reduce training time, set train_indices to a subset of the training data
 # https://github.com/rasbt/deeplearning-models/blob/master/pytorch_ipynb/cnn/nin-cifar10_batchnorm.ipynb
-# train_indices = None
-train_indices = torch.arange(0, 1000)
+if device == 'cpu':
+    # subset of training data
+    train_indices = torch.arange(0, 1000)
+else:
+    # all training data
+    train_indices = None
 #%%
 # get data sets and classes_to_idx
 train_dataset, test_dataset, classes_to_idx = get_datasets(batch_size=batch_size,
@@ -43,7 +56,7 @@ else:
     print('Too many classes to print. Number of classes:', num_classes)
 #%%
 # get required resolution for chosen model
-from models import model_choice
+
 torch.manual_seed(random_seed)
 model, resolution = model_choice(model, pretrained, num_classes)
 model = model.to(device)

@@ -2,7 +2,7 @@
 Contains functionality for creating PyTorch DataLoaders for
 image classification data.
 """
-import os
+
 import numpy as np
 import torch
 from torchvision import datasets, transforms
@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, Subset
 
 NUM_WORKERS = 0
 
-def get_datasets(batch_size=32, train_indices=None):
+def get_datasets(train_indices=None):
     """
     Loads the CIFAR10 dataset and calculates the mean and standard deviation of the training data.
 
