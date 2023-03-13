@@ -145,13 +145,13 @@ def get_loaders(batch_size, device, train_reader, test_reader):
                               batch_size=batch_size,
                               shuffle=True,
                               num_workers= NUM_WORKERS,
-                              pin_memory=True)
+                              pin_memory=False)
 
 
     test_loader = DataLoader(dataset=test_reader,
                              batch_size=batch_size,
                              shuffle=False,
                              num_workers= NUM_WORKERS,
-                             pin_memory=True)
+                             pin_memory=False)
 
     return train_loader, test_loader

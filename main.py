@@ -1,6 +1,5 @@
 #%%
 import torch
-import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from torchinfo import summary
@@ -51,6 +50,7 @@ else:
 torch.manual_seed(random_seed)
 model, resolution = model_choice(model, pretrained, num_classes)
 model = model.to(device)
+#%%
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 #%%
 # inspect model
@@ -99,55 +99,59 @@ plt.show();
 #%% md
 ## 2. Train
 #%%
-from eval import compute_accuracy
-import time
-start_time = time.time()
-for epoch in range(num_epochs):
+from engine import train_classifier_simple_v1
+log_dict = train_classifier_simple_v1(model, train_loader, test_loader, optimizer, num_epochs, device)
 
-    model.train()
-
-    for batch_idx, (features, targets) in enumerate(train_loader):
-
-        ### PREPARE MINIBATCH
-        features = features.to(device)
-        targets = targets.to(device)
-
-        ### FORWARD AND BACK PROP
-        logits, probas = model(features)
-        loss = F.cross_entropy(logits, targets)
-        optimizer.zero_grad()
-
-        loss.backward()
-
-        ### UPDATE MODEL PARAMETERS
-        optimizer.step()
-
-        ### LOGGING
-        if batch_idx % int(len(train_loader)*(1/5)) == 0:
-            print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} | '
-                  f'Batch {batch_idx:03d}/{len(train_loader):03d} |'
-                  f' Loss: {loss:.4f}')
-
-    # no need to build the computation graph for backprop when computing accuracy
-    with torch.set_grad_enabled(False):
-        train_acc = compute_accuracy(model, train_loader, device=device)
-        print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} Train Acc.: {train_acc:.2f}%')
-
-    elapsed = (time.time() - start_time) / 60
-    print(f'Time elapsed: {elapsed:.2f} min')
-
-elapsed = (time.time() - start_time) / 60
-print(f'Total Training Time: {elapsed:.2f} min')
-#%%
-# test
-with torch.set_grad_enabled(False):
-    test_acc = compute_accuracy(model, test_loader, device=device)
-    print(f'Test Accuracy: {test_acc:.2f}%')
-
-# the above code gives the following error message: line 197, in backward
-#     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-# your task is to re-write the code from above to fix this error message
-
-start_time = time.time()
-for epoch in range(num_epochs):
-    pass
+# #
+# from eval import compute_accuracy
+# import time
+# start_time = time.time()
+# for epoch in range(num_epochs):
+#
+#     model.train()
+#
+#     for batch_idx, (features, targets) in enumerate(train_loader):
+#
+#         ### PREPARE MINIBATCH
+#         features = features.to(device)
+#         targets = targets.to(device)
+#
+#         ### FORWARD AND BACK PROP
+#         logits, probas = model(features)
+#         loss = F.cross_entropy(logits, targets)
+#         optimizer.zero_grad()
+#
+#         loss.backward()
+#
+#         ### UPDATE MODEL PARAMETERS
+#         optimizer.step()
+#
+#         ### LOGGING
+#         if batch_idx % int(len(train_loader)*(1/5)) == 0:
+#             print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} | '
+#                   f'Batch {batch_idx:03d}/{len(train_loader):03d} |'
+#                   f' Loss: {loss:.4f}')
+#
+#     # no need to build the computation graph for backprop when computing accuracy
+#     with torch.set_grad_enabled(False):
+#         train_acc = compute_accuracy(model, train_loader, device=device)
+#         print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} Train Acc.: {train_acc:.2f}%')
+#
+#     elapsed = (time.time() - start_time) / 60
+#     print(f'Time elapsed: {elapsed:.2f} min')
+#
+# elapsed = (time.time() - start_time) / 60
+# print(f'Total Training Time: {elapsed:.2f} min')
+# #%%
+# # test
+# with torch.set_grad_enabled(False):
+#     test_acc = compute_accuracy(model, test_loader, device=device)
+#     print(f'Test Accuracy: {test_acc:.2f}%')
+#
+# # the above code gives the following error message: line 197, in backward
+# #     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+# # your task is to re-write the code from above to fix this error message
+#
+# start_time = time.time()
+# for epoch in range(num_epochs):
+#     pass
