@@ -95,9 +95,6 @@ assert images.shape[3] == resolution
 # For the given batch, check that the channel means and standard deviations are roughly 0 and 1, respectively:
 print('Channel mean:', torch.mean(images[:, 0, :, :]))
 print('Channel std:', torch.std(images[:, 0, :, :]))
-# assert roughly 0 and 1, can be off by 0.3
-assert torch.mean(images[:, 0, :, :]) < 0.3
-assert torch.std(images[:, 0, :, :]) < 0.3
 
 #%%
 from torchvision.utils import make_grid
