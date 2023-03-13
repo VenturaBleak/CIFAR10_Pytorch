@@ -49,9 +49,9 @@ else:
 # https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling
 if scheduler_choice == 'cyclic':
     # scheduler hyperparams
-    base_lr = 0.00005
+    base_lr = 0.0001
     max_lr = 0.001
-    step_size_up = 5
+    step_size_up = 4
     mode = 'triangular2'
     gamma = 0.90
     scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer=optimizer,

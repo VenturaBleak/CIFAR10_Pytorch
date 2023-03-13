@@ -3,6 +3,7 @@ from metrics import compute_accuracy, compute_epoch_loss
 import time
 import torch
 import torch.nn.functional as F
+from tqdm.auto import tqdm
 
 def train_classifier_simple_v1(num_epochs, model,
                                optimizer, device,
@@ -150,7 +151,7 @@ def train_classifier_simple_v2(
 
     best_valid_acc, best_test_acc, best_epoch = -float('inf'), -float('inf'), 0
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
 
         model.train()
         for batch_idx, (features, targets) in enumerate(train_loader_aug):
