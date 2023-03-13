@@ -9,6 +9,7 @@ def train_classifier_simple_v1(num_epochs,
                                model,
                                optimizer,
                                device,
+                               train_loader_aug,
                                train_loader,
                                test_loader,
                                valid_loader=None,
@@ -51,7 +52,7 @@ def train_classifier_simple_v1(num_epochs,
     for epoch in range(num_epochs):
 
         model.train()
-        for batch_idx, (features, targets) in enumerate(train_loader):
+        for batch_idx, (features, targets) in enumerate(train_loader_aug):
 
             features = features.to(device)
             targets = targets.to(device)
@@ -75,9 +76,9 @@ def train_classifier_simple_v1(num_epochs,
             # LOGGING
             log_dict['train_loss_per_batch'].append(loss.item())
 
-            if batch_idx % int(len(train_loader)*(1/5)) == 0:
+            if batch_idx % int(len(train_loader_aug)*(1/5)) == 0:
                 print(f'Epoch: {epoch + 1:03d}/{num_epochs:03d} | '
-                      f'Batch {batch_idx:03d}/{len(train_loader):03d} |'
+                      f'Batch {batch_idx:03d}/{len(train_loader_aug):03d} |'
                       f' Loss: {loss:.4f}')
 
         if not skip_epoch_stats:

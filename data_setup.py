@@ -107,11 +107,18 @@ def get_readers2(train_transform, test_transform, train_indices=None):
     train_loader, test_loader = load_data(64)
     """
     # Setup training data
-    train_reader = datasets.CIFAR10(
+    train_reader_aug = datasets.CIFAR10(
         root="CIFAR10",  # where to download data to?
         train=True,  # get training data
         download=False,  # download data if it doesn't exist on disk
         transform=train_transform
+    )
+
+    train_reader = datasets.CIFAR10(
+        root="CIFAR10",  # where to download data to?
+        train=True,  # get training data
+        download=False,  # download data if it doesn't exist on disk
+        transform=test_transform
     )
 
     # Setup test data
@@ -123,12 +130,13 @@ def get_readers2(train_transform, test_transform, train_indices=None):
     )
 
     if train_indices is not None:
+        train_reader_aug = Subset(train_reader, train_indices)
         train_reader = Subset(train_reader, train_indices)
         test_reader = Subset(test_reader, train_indices)
 
-    return train_reader, test_reader
+    return train_reader_aug, train_reader, test_reader
 
-def get_loaders(batch_size, device, train_reader, test_reader):
+def get_loaders(batch_size, device, train_reader_aug, train_reader, test_reader):
     """
     Creates PyTorch DataLoaders for the training and test data.
 
@@ -141,12 +149,17 @@ def get_loaders(batch_size, device, train_reader, test_reader):
     NUM_WORKERS = num_workers(device)
 
     # Create data loaders
-    train_loader = DataLoader(dataset=train_reader,
+    train_loader_aug = DataLoader(dataset=train_reader_aug,
                               batch_size=batch_size,
                               shuffle=True,
                               num_workers= NUM_WORKERS,
                               pin_memory=False)
 
+    train_loader = DataLoader(dataset=train_reader,
+                              batch_size=batch_size,
+                              shuffle=True,
+                              num_workers= NUM_WORKERS,
+                              pin_memory=False)
 
     test_loader = DataLoader(dataset=test_reader,
                              batch_size=batch_size,
@@ -154,4 +167,4 @@ def get_loaders(batch_size, device, train_reader, test_reader):
                              num_workers= NUM_WORKERS,
                              pin_memory=False)
 
-    return train_loader, test_loader
+    return train_loader_aug, train_loader, test_loader
