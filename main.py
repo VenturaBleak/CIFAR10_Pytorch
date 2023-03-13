@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from torchinfo import summary
 from torchvision import transforms
 
-from data_setup import get_datasets, train_mean_std, load_data
+from data_setup import get_readers1, get_readers2, train_mean_std, get_loaders
 from models import model_choice
 #%%
 # Device
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
 print('Device:', device)
 #%% md
 ## 1. Load Data
@@ -18,7 +18,7 @@ print('Device:', device)
 # Hyperparameters
 random_seed = 42
 learning_rate = 0.001
-num_epochs = 5
+num_epochs = 2
 batch_size = 32
 model = 'NiN'
 pretrained = True
@@ -26,17 +26,17 @@ GRAYSCALE = False
 #%%
 # to reduce training time, set train_indices to a subset of the training data
 # https://github.com/rasbt/deeplearning-models/blob/master/pytorch_ipynb/cnn/nin-cifar10_batchnorm.ipynb
-if device == 'cpu':
-    # subset of training data
-    train_indices = torch.arange(0, 1000)
-else:
+if str(device) != 'cpu':
     # all training data
     train_indices = None
+else:
+    # subset of training data
+    train_indices = torch.arange(0, 1000)
 #%%
 # get data sets and classes_to_idx
-train_dataset, test_dataset, classes_to_idx = get_datasets(train_indices=train_indices)
+train_reader, test_reader, classes_to_idx = get_readers1(train_indices=train_indices)
 # get mean and std
-train_mean, train_std = train_mean_std(train_dataset, batch_size=batch_size)
+train_mean, train_std = train_mean_std(train_reader, batch_size=batch_size)
 #%%
 # get num classes
 num_classes = len(classes_to_idx.keys())
@@ -71,11 +71,12 @@ test_transform = transforms.Compose([
 ])
 #%%
 # Load data
-train_dataset, test_dataset, train_loader, test_loader = load_data(batch_size=batch_size,
-                                                                   train_transform=train_transform_trivial_augment,
-                                                                   test_transform=test_transform,
-                                                                   train_indices=train_indices,
-                                                                   device=device)
+train_reader, test_reader = get_readers2(train_transform=train_transform_trivial_augment,
+                                         test_transform=test_transform,
+                                         train_indices=train_indices)
+
+train_loader, test_loader = get_loaders(batch_size, device, train_reader, test_reader)
+
 #%%
 # Checking the dataset
 images, labels = next(iter(train_loader))
@@ -142,3 +143,11 @@ print(f'Total Training Time: {elapsed:.2f} min')
 with torch.set_grad_enabled(False):
     test_acc = compute_accuracy(model, test_loader, device=device)
     print(f'Test Accuracy: {test_acc:.2f}%')
+
+# the above code gives the following error message: line 197, in backward
+#     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+# your task is to re-write the code from above to fix this error message
+
+start_time = time.time()
+for epoch in range(num_epochs):
+    pass
