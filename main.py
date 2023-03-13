@@ -19,7 +19,7 @@ random_seed = 42
 learning_rate = 0.001
 num_epochs = 2
 batch_size = 32
-model = 'NiN'
+model_name = 'NiN'
 pretrained = True
 GRAYSCALE = False
 #%%
@@ -46,9 +46,8 @@ else:
     print('Too many classes to print. Number of classes:', num_classes)
 #%%
 # get required resolution for chosen model
-
 torch.manual_seed(random_seed)
-model, resolution = model_choice(model, pretrained, num_classes)
+model, resolution = model_choice(model_name, pretrained, num_classes)
 model = model.to(device)
 #%%
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -100,7 +99,12 @@ plt.show();
 ## 2. Train
 #%%
 from engine import train_classifier_simple_v1
-log_dict = train_classifier_simple_v1(model, train_loader, test_loader, optimizer, num_epochs, device)
+log_dict = train_classifier_simple_v1(num_epochs=num_epochs,
+                                        model=model,
+                                        train_loader=train_loader,
+                                        test_loader=test_loader,
+                                        optimizer=optimizer,
+                                        device=device)
 
 # #
 # from eval import compute_accuracy
