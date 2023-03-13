@@ -20,7 +20,7 @@ batch_size = 32
 augment = True
 validation_fraction = 0.1
 # Model hyperparameters
-num_epochs = 1
+num_epochs = 2
 model_name = 'NiN'
 pretrained = True
 optimizer_choice = 'SGD'
