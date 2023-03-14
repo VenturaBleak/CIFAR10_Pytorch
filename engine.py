@@ -177,11 +177,6 @@ def train_classifier_simple_v2(
             #           f'Batch {batch_idx + 1:03d}/{len(train_loader_aug):03d} |'
             #           f' Loss: {loss:.4f}')
 
-        if scheduler is not None:
-            # logging learning rate
-            log_dict['learning_rate_per_epoch'].append(optimizer.param_groups[0]['lr'])
-            scheduler.step()
-
         model.eval()
         with torch.inference_mode():  # save memory during inference
             # compute train accuracy
@@ -213,6 +208,14 @@ def train_classifier_simple_v2(
                       f'| Best Validation '
                       f'(Ep. {best_epoch:03d}): {best_valid_acc :.2f}%')
 
+                if scheduler is not None:
+                    # logging learning rate
+                    log_dict['learning_rate_per_epoch'].append(optimizer.param_groups[0]['lr'])
+                    if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                        scheduler.step(valid_loss)
+                    else:
+                        scheduler.step()
+
             # compute test accuracy
             if test_loader is not None:
                 test_acc = compute_accuracy(model, test_loader, device)
@@ -232,6 +235,15 @@ def train_classifier_simple_v2(
                       f'| Test Acc: {test_acc :.2f}% '
                       f'| Best Test '
                       f'(Ep. {best_epoch:03d}): {best_test_acc :.2f}%')
+
+                if scheduler is not None:
+                    # logging learning rate
+                    log_dict['learning_rate_per_epoch'].append(optimizer.param_groups[0]['lr'])
+                    # if scheduler is reduce on plateau, then step with test loss, else step without loss
+                    if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                        scheduler.step(test_loss)
+                    else:
+                        scheduler.step()
 
     elapsed = (time.time() - start_time)/60
     print(f'Total Training Time Elapsed: {elapsed:.2f} min')

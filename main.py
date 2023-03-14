@@ -20,11 +20,11 @@ batch_size = 32
 augment = True
 validation_fraction = 0.1
 # Model hyperparameters
-num_epochs = 8
+num_epochs = 4
 model_name = 'NiN'
 pretrained = True
 optimizer_choice = 'SGD'
-scheduler_choice = 'cyclic'
+scheduler_choice = 'reduce_on_plateau'
 lr = 0.01
 #%%
 # get required resolution for chosen model
@@ -37,7 +37,7 @@ summary(model, input_size=[1, 3, resolution, resolution])
 #%%
 # Create optimizer and scheduler
 if optimizer_choice == 'SGD':
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     cycle_momentum = True
 elif optimizer_choice == 'Adam':
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -49,18 +49,25 @@ else:
 # https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling
 if scheduler_choice == 'cyclic':
     # scheduler hyperparams
-    base_lr = 0.003
-    max_lr = 0.001
-    step_size_up = 4
+    base_lr = 0.001
+    max_lr = 0.008
+    step_size_up = 1
+    step_size_down = 5
     mode = 'triangular2'
-    gamma = 0.90
+    gamma = 0.85
     scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer=optimizer,
                                                   base_lr=base_lr,
                                                   max_lr=max_lr,
                                                   step_size_up=step_size_up,
+                                                  step_size_down=step_size_down,
                                                   mode=mode,
                                                   gamma=gamma,
                                                   cycle_momentum=cycle_momentum)
+elif scheduler_choice == 'reduce_on_plateau':
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
+                                                           mode='min',
+                                                           factor=0.1,
+                                                           patience=6)
 elif scheduler_choice == None:
     scheduler = None
 else:
