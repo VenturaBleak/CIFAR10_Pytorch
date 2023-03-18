@@ -23,7 +23,7 @@ validation_fraction = 0.1
 num_epochs = 100
 model_name = 'NiN'
 pretrained = False
-optimizer_choice = 'Adam'
+optimizer_choice = 'SGD'
 scheduler_choice = 'cosine'
 lr = 0.01
 #%%
@@ -38,10 +38,8 @@ summary(model, input_size=[1, 3, resolution, resolution])
 # Instantiate optimizer
 if optimizer_choice == 'SGD':
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-    cycle_momentum = True
 elif optimizer_choice == 'Adam':
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    cycle_momentum = False
 else:
     raise ValueError('Optimizer_choice not supported')
 #%%
