@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from torchvision import models
+
 def model_choice(model,
                  pretrained = False,
                  num_classes = None):
@@ -13,9 +15,7 @@ def model_choice(model,
     # raise error if num classes not specified
     if num_classes is None:
         raise ValueError("Please specify num_classes")
-    # raise error if model not in list
-    if model not in ['NiN']:
-        raise ValueError("Model not in list")
+
 
     # specify models
     if model == 'NiN':
@@ -77,3 +77,6 @@ def model_choice(model,
 
         model = NiN(num_classes=num_classes)
         return model, 32
+
+    else:
+        raise ValueError("Please specify model")

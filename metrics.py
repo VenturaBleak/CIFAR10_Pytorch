@@ -43,7 +43,7 @@ def compute_epoch_loss(model, data_loader, device):
 
 def compute_epoch_metrics(model, data_loader, device, num_classes):
     model.eval()
-    curr_loss, num_examples = 0., 0
+    curr_loss, num_observations = 0., 0
 
     # Initialize torchmetrics
     accuracy_metric = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes).to(device)
@@ -58,7 +58,7 @@ def compute_epoch_metrics(model, data_loader, device, num_classes):
             logits, probas = model(features)
 
             loss = F.cross_entropy(logits, targets, reduction='sum')
-            num_examples += targets.size(0)
+            num_observations += targets.size(0)
             curr_loss += loss
 
             # Update metrics
@@ -68,7 +68,7 @@ def compute_epoch_metrics(model, data_loader, device, num_classes):
             recall_metric.update(predicted_labels, targets)
             f1_metric.update(predicted_labels, targets)
 
-        curr_loss = curr_loss / num_examples
+        curr_loss = curr_loss / num_observations
         accuracy = (accuracy_metric.compute()).item()
         precision = (precision_metric.compute()).item()
         recall = (recall_metric.compute()).item()

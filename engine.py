@@ -221,6 +221,12 @@ def train_classifier_simple_v2(
                     if best_model_save_path:
                         torch.save(model.state_dict(), best_model_save_path)
 
+                        # save log_dict as pickle
+                        log_dict_path = os.path.join(best_model_save_path[:-3] + "_log_dict.pkl")
+                        # save log_dict
+                        with open(log_dict_path, "wb") as f:
+                            pickle.dump(log_dict, f)
+
                 print(f'***Epoch: {epoch + 1:03d}/{num_epochs:03d} '
                       f'| Train Loss: {train_loss :.4f} '
                       f'| Valid. Loss: {valid_loss :.4f} '
@@ -253,6 +259,12 @@ def train_classifier_simple_v2(
                     if best_model_save_path:
                         torch.save(model.state_dict(), best_model_save_path)
 
+                        # save log_dict as pickle
+                        log_dict_path = os.path.join(best_model_save_path[:-3] + "_log_dict.pkl")
+                        # save log_dict
+                        with open(log_dict_path, "wb") as f:
+                            pickle.dump(log_dict, f)
+
                 print(f'***Epoch: {epoch + 1:03d}/{num_epochs:03d} '
                       f'| Train Loss: {train_loss :.4f} '
                       f'| Test Loss: {test_loss :.4f} '
@@ -272,9 +284,3 @@ def train_classifier_simple_v2(
 
     elapsed = (time.time() - start_time)/60
     print(f'Total Training Time Elapsed: {elapsed:.2f} min')
-
-    # save log_dict as pickle
-    log_dict_path = os.path.join(best_model_save_path[:-3] + "_log_dict.pkl")
-    # save log_dict
-    with open(log_dict_path, "wb") as f:
-        pickle.dump(log_dict, f)

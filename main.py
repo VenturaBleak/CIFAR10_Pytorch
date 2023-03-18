@@ -24,7 +24,7 @@ num_epochs = 100
 model_name = 'NiN'
 pretrained = False
 optimizer_choice = 'SGD'
-scheduler_choice = 'reduce_on_plateau'
+scheduler_choice = 'cosine'
 lr = 0.01
 #%%
 # get required resolution for chosen model

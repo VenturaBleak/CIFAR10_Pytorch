@@ -151,7 +151,7 @@ def get_dataloaders_cifar10(batch_size: int,
             transforms.Resize((resolution, resolution)),
             transforms.TrivialAugmentWide(),
             transforms.ToTensor(),
-            transforms.Normalize(train_mean, train_std)
+            transforms.Normalize(train_mean, train_std) # results in images with mean = 0 and std = 1
         ])
         print('Augmentation will be applied.')
     else:
