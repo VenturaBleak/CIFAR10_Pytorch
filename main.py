@@ -23,7 +23,7 @@ validation_fraction = 0.1
 num_epochs = 100
 model_name = 'NiN'
 pretrained = False
-optimizer_choice = 'SGD'
+optimizer_choice = 'Adam'
 scheduler_choice = 'cosine'
 lr = 0.01
 #%%
