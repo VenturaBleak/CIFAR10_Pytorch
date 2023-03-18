@@ -46,10 +46,10 @@ def compute_epoch_metrics(model, data_loader, device, num_classes):
     curr_loss, num_examples = 0., 0
 
     # Initialize torchmetrics
-    accuracy_metric = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes)
-    precision_metric = torchmetrics.Precision(task='multiclass' ,average='macro', num_classes=num_classes)
-    recall_metric = torchmetrics.Recall(task='multiclass', average='macro', num_classes=num_classes)
-    f1_metric = torchmetrics.F1Score(task='multiclass', average='macro', num_classes=num_classes)
+    accuracy_metric = torchmetrics.Accuracy(task='multiclass', num_classes=num_classes).to(device)
+    precision_metric = torchmetrics.Precision(task='multiclass', average='macro', num_classes=num_classes).to(device)
+    recall_metric = torchmetrics.Recall(task='multiclass', average='macro', num_classes=num_classes).to(device)
+    f1_metric = torchmetrics.F1Score(task='multiclass', average='macro', num_classes=num_classes).to(device)
 
     with torch.inference_mode():
         for features, targets in data_loader:
@@ -68,7 +68,7 @@ def compute_epoch_metrics(model, data_loader, device, num_classes):
             recall_metric.update(predicted_labels, targets)
             f1_metric.update(predicted_labels, targets)
 
-        curr_loss = (curr_loss / num_examples).item()
+        curr_loss = curr_loss / num_examples
         accuracy = (accuracy_metric.compute()).item()
         precision = (precision_metric.compute()).item()
         recall = (recall_metric.compute()).item()

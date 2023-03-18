@@ -201,7 +201,7 @@ def train_classifier_simple_v2(
             # compute train metrics
             train_loss, train_acc, train_precision, train_recall, train_f1 = compute_epoch_metrics(model, train_loader,
                                                                                                    device, num_classes)
-            log_dict['train_loss_per_epoch'].append(train_loss)
+            log_dict['train_loss_per_epoch'].append(train_loss.item())
             log_dict['train_acc_per_epoch'].append(train_acc)
             log_dict['train_f1score_per_epoch'].append(train_f1)
             log_dict['train_precision_per_epoch'].append(train_precision)
@@ -210,7 +210,7 @@ def train_classifier_simple_v2(
             if valid_loader is not None:
                 # compute validation accuracy
                 valid_loss, valid_acc, valid_precision, valid_recall, valid_f1 = compute_epoch_metrics(model, valid_loader, device, num_classes)
-                log_dict['valid_loss_per_epoch'].append(valid_loss)
+                log_dict['valid_loss_per_epoch'].append(valid_loss.item())
                 log_dict['valid_acc_per_epoch'].append(valid_acc)
                 log_dict['valid_f1score_per_epoch'].append(valid_f1)
                 log_dict['valid_precision_per_epoch'].append(valid_precision)
@@ -242,7 +242,7 @@ def train_classifier_simple_v2(
                 # compute test metrics
                 test_loss, test_acc, test_precision, test_recall, test_f1 = compute_epoch_metrics(model, test_loader,
                                                                                                   device, num_classes)
-                log_dict['test_loss_per_epoch'].append(test_loss)
+                log_dict['test_loss_per_epoch'].append(test_loss.item())
                 log_dict['test_acc_per_epoch'].append(test_acc)
                 log_dict['test_f1score_per_epoch'].append(test_f1)
                 log_dict['test_precision_per_epoch'].append(test_precision)
