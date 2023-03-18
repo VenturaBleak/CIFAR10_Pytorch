@@ -6,23 +6,23 @@ from torchinfo import summary
 
 from data_setup import get_dataloaders_cifar10
 from models import model_choice
+from metrics import get_model_path
 #%%
 # Device
 device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
 print('Device:', device)
-#%% md
-## 1. Load Data
 #%%
-# Data parameters
+# Data parameters - keep as is
 random_seed = 42
 num_classes_user = 10
 batch_size = 32
 augment = True
 validation_fraction = 0.1
+#%%
 # Model hyperparameters
-num_epochs = 1
+num_epochs = 100
 model_name = 'NiN'
-pretrained = True
+pretrained = False
 optimizer_choice = 'SGD'
 scheduler_choice = 'reduce_on_plateau'
 lr = 0.01
@@ -35,7 +35,7 @@ model = model.to(device)
 # inspect model
 summary(model, input_size=[1, 3, resolution, resolution])
 #%%
-# Create optimizer and scheduler
+# Instantiate optimizer
 if optimizer_choice == 'SGD':
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     cycle_momentum = True
@@ -45,29 +45,41 @@ elif optimizer_choice == 'Adam':
 else:
     raise ValueError('Optimizer_choice not supported')
 #%%
-### Scheduler
-# https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling
-if scheduler_choice == 'cyclic':
+# Instantiate scheduler
+if scheduler_choice == 'reduce_on_plateau':
     # scheduler hyperparams
-    base_lr = 0.001
-    max_lr = 0.008
-    step_size_up = 1
-    step_size_down = 5
-    mode = 'triangular2'
-    gamma = 0.85
-    scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer=optimizer,
-                                                  base_lr=base_lr,
-                                                  max_lr=max_lr,
-                                                  step_size_up=step_size_up,
-                                                  step_size_down=step_size_down,
-                                                  mode=mode,
-                                                  gamma=gamma,
-                                                  cycle_momentum=cycle_momentum)
-elif scheduler_choice == 'reduce_on_plateau':
+    mode = 'min'
+    factor = 0.2
+    patience = 10
+    cooldown = 5
+    min_lr = 1e-6
+    verbose = True
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
-                                                           mode='min',
-                                                           factor=0.1,
-                                                           patience=6)
+                                                            mode=mode,
+                                                            factor=factor,
+                                                            patience=patience,
+                                                            cooldown=cooldown,
+                                                            min_lr=min_lr,
+                                                            verbose=verbose)
+elif scheduler_choice == 'cosine':
+    # scheduler hyperparams
+    T_max = num_epochs # he number of epochs or iterations to complete one cosine annealing cycle.
+    eta_min = 1e-6 # The minimum learning rate at the end of each cycle
+    # scheduler
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer,
+                                                           T_max=T_max,
+                                                           eta_min=eta_min)
+elif scheduler_choice == 'cosine_warm_restarts':
+    # scheduler hyperparams
+    T_0 = 10 # the number of epochs or iterations for the initial restart cycle
+    T_mult = 2 # The factor by which the cycle length increases after each restart.
+    eta_min = 1e-6 # min learning rat at the end of each cycle
+    # scheduler
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,
+                                                                     T_0=T_0,
+                                                                     T_mult=T_mult,
+                                                                     eta_min=eta_min)
+
 elif scheduler_choice == None:
     scheduler = None
 else:
@@ -95,15 +107,15 @@ else:
 images, labels = next(iter(train_loader_aug))
 assert images.shape[0] == batch_size
 assert labels.shape[0] == batch_size
-assert images.shape[1] == 3
+assert images.shape[1] == 3 # RGB
 assert images.shape[2] == resolution
 assert images.shape[3] == resolution
 #%%
 # For the given batch, check that the channel means and standard deviations are roughly 0 and 1, respectively:
 print('Channel mean:', torch.mean(images[:, 0, :, :]))
 print('Channel std:', torch.std(images[:, 0, :, :]))
-
 #%%
+# visualize some sample images
 from torchvision.utils import make_grid
 plt.figure(figsize=(8, 8))
 plt.axis("off")
@@ -118,16 +130,14 @@ plt.show();
 #%%
 # mkdir for saving model, if it doesn't exist
 import os
-mo = 'models'
+model_folder_name = 'models'
 # get current working directory
-cwd = os.getcwd()
-model_dir = os.path.join(cwd, mo)
-model_path = os.path.join(model_dir, model_name + ".pt")
+current_working_directory = os.getcwd()
+model_dir = os.path.join(current_working_directory, model_folder_name)
 
-# Check if the directory exists
-if not os.path.exists(model_dir):
-  # Create the directory
-  os.makedirs(model_dir)
+# get model path
+model_path = get_model_path(model_dir, model_name)
+
 #%%
 from engine import train_classifier_simple_v1, train_classifier_simple_v2
 log_dict = train_classifier_simple_v2(num_epochs=num_epochs,
@@ -139,7 +149,8 @@ log_dict = train_classifier_simple_v2(num_epochs=num_epochs,
                                         test_loader=None,
                                         optimizer=optimizer,
                                         device=device,
-                                        best_model_save_path=model_path)
+                                        best_model_save_path=model_path,
+                                        num_classes=num_classes)
 #%%
 # log_dict = train_classifier_simple_v1(num_epochs=num_epochs,
 #                                       model=model,
@@ -150,9 +161,4 @@ log_dict = train_classifier_simple_v2(num_epochs=num_epochs,
 #                                       optimizer=optimizer,
 #                                       device=device)
 #%%
-# save log_dict as pickle
-import pickle
-log_dict_path = os.path.join(model_dir, model_name + "_log_dict.pkl")
-# save log_dict
-with open(log_dict_path, "wb") as f:
-    pickle.dump(log_dict, f)
+

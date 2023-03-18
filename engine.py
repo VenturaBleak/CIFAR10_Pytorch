@@ -4,6 +4,9 @@ import time
 import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
+import os
+import pickle
+from metrics import compute_epoch_metrics
 
 def train_classifier_simple_v1(num_epochs, model,
                                optimizer, device,
@@ -128,20 +131,36 @@ def train_classifier_simple_v2(
         loss_fn=None,
         best_model_save_path=None,
         scheduler=None,
-        skip_train_acc=False):
+        num_classes=None):
     # either only valid or only test loader, raise error if both are None
     if valid_loader is None and test_loader is None:
         raise ValueError('Either valid_loader or test_loader must be provided.')
     if valid_loader is not None and test_loader is not None:
         raise ValueError('Only one of valid_loader or test_loader can be provided, not both.')
 
+    # check if num_classes is provided
+    if num_classes is None:
+        raise ValueError('num_classes must be provided.')
+
+    # check if best_model_save_path is provided
+    if best_model_save_path is None:
+        raise ValueError('best_model_save_path must be provided.')
+
     start_time = time.time()
     log_dict = {'train_loss_per_batch': [],
                 'train_acc_per_epoch': [],
+                'train_f1score_per_epoch': [],
+                'train_precision_per_epoch': [],
+                'train_recall_per_epoch': [],
                 'train_loss_per_epoch': [],
                 'valid_acc_per_epoch': [],
+                'valid_f1score_per_epoch': [],
+                'valid_precision_per_epoch': [],
+                'valid_recall_per_epoch': [],
                 'valid_loss_per_epoch': [],
                 'test_acc_per_epoch': [],
+                'test_f1score_per_epoch': [],
+                'test_precision_per_epoch': [],
                 'test_loss_per_epoch': [],
                 'learning_rate_per_epoch': []}
 
@@ -179,24 +198,26 @@ def train_classifier_simple_v2(
 
         model.eval()
         with torch.inference_mode():  # save memory during inference
-            # compute train accuracy
-            if not skip_train_acc:
-                train_acc = compute_accuracy(model, train_loader, device=device)
-            else:
-                train_acc = float('nan')
-            train_loss = compute_epoch_loss(model, train_loader, device)
-            log_dict['train_loss_per_epoch'].append(train_loss.item())
-            log_dict['train_acc_per_epoch'].append(train_acc.item())
+            # compute train metrics
+            train_loss, train_acc, train_precision, train_recall, train_f1 = compute_epoch_metrics(model, train_loader,
+                                                                                                   device, num_classes)
+            log_dict['train_loss_per_epoch'].append(train_loss)
+            log_dict['train_acc_per_epoch'].append(train_acc)
+            log_dict['train_f1score_per_epoch'].append(train_f1)
+            log_dict['train_precision_per_epoch'].append(train_precision)
+            log_dict['train_recall_per_epoch'].append(train_recall)
 
             if valid_loader is not None:
                 # compute validation accuracy
-                valid_acc = compute_accuracy(model, valid_loader, device)
-                valid_loss = compute_epoch_loss(model, valid_loader, device)
-                log_dict['valid_loss_per_epoch'].append(valid_loss.item())
-                log_dict['valid_acc_per_epoch'].append(valid_acc.item())
+                valid_loss, valid_acc, valid_precision, valid_recall, valid_f1 = compute_epoch_metrics(model, valid_loader, device, num_classes)
+                log_dict['valid_loss_per_epoch'].append(valid_loss)
+                log_dict['valid_acc_per_epoch'].append(valid_acc)
+                log_dict['valid_f1score_per_epoch'].append(valid_f1)
+                log_dict['valid_precision_per_epoch'].append(valid_precision)
+                log_dict['valid_recall_per_epoch'].append(valid_recall)
 
-                if valid_acc.item() > best_valid_acc:
-                    best_valid_acc, best_epoch = valid_acc.item(), epoch+1
+                if valid_acc > best_valid_acc:
+                    best_valid_acc, best_epoch = valid_acc, epoch+1
                     if best_model_save_path:
                         torch.save(model.state_dict(), best_model_save_path)
 
@@ -218,13 +239,17 @@ def train_classifier_simple_v2(
 
             # compute test accuracy
             if test_loader is not None:
-                test_acc = compute_accuracy(model, test_loader, device)
-                test_loss = compute_epoch_loss(model, test_loader, device)
-                log_dict['test_loss_per_epoch'].append(test_loss.item())
-                log_dict['test_acc_per_epoch'].append(test_acc.item())
+                # compute test metrics
+                test_loss, test_acc, test_precision, test_recall, test_f1 = compute_epoch_metrics(model, test_loader,
+                                                                                                  device, num_classes)
+                log_dict['test_loss_per_epoch'].append(test_loss)
+                log_dict['test_acc_per_epoch'].append(test_acc)
+                log_dict['test_f1score_per_epoch'].append(test_f1)
+                log_dict['test_precision_per_epoch'].append(test_precision)
+                log_dict['test_recall_per_epoch'].append(test_recall)
 
-                if test_acc.item() > best_test_acc:
-                    best_test_acc, best_epoch = test_acc.item(), epoch+1
+                if test_acc > best_test_acc:
+                    best_test_acc, best_epoch = test_acc, epoch+1
                     if best_model_save_path:
                         torch.save(model.state_dict(), best_model_save_path)
 
@@ -248,4 +273,8 @@ def train_classifier_simple_v2(
     elapsed = (time.time() - start_time)/60
     print(f'Total Training Time Elapsed: {elapsed:.2f} min')
 
-    return log_dict
+    # save log_dict as pickle
+    log_dict_path = os.path.join(best_model_save_path[:-3] + "_log_dict.pkl")
+    # save log_dict
+    with open(log_dict_path, "wb") as f:
+        pickle.dump(log_dict, f)
