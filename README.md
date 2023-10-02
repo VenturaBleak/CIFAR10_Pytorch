@@ -47,17 +47,6 @@
     <li><strong>models.py</strong>: Provides model architectures and related utilities.</li>
 </ul>
 
-<h2>Repository Structure</h2>
-<p>The repository is structured with the following main scripts:</p>
-<ul>
-    <li><strong>data_setup.py</strong>: Handles data preparation and loading processes for CIFAR-10.</li>
-    <li><strong>engine.py</strong>: Contains core functionalities for the training loop of the classifier.</li>
-    <li><strong>eval.py</strong>: Manages model evaluation processes.</li>
-    <li><strong>main.py</strong>: The primary script for executing the model training workflow.</li>
-    <li><strong>metrics.py</strong>: Defines various metrics used for evaluating model performance.</li>
-    <li><strong>models.py</strong>: Provides model architectures and related utilities.</li>
-</ul>
-
 <h2>Key Components</h2>
 
 <h3>main.py</h3>
