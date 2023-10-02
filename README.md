@@ -39,3 +39,29 @@
         </ul>
     </li>
     <li><strong>Training</strong>: 
+        <ul>
+            <li>Directories for saving the trained model are created or checked.</li>
+            <li>The training process is initiated using the <code>train_classifier_simple_v2</code> function from the <code>engine</code> module.</li>
+            <li>Optionally, the script provides an alternative training process using <code>train_classifier_simple_v1</code>.</li>
+            <li>After training, logs are saved as pickle files for future reference.</li>
+        </ul>
+    </li>
+</ol>
+
+<h2>Auxiliary Modules</h2>
+<ol>
+    <li><strong>data_setup</strong>: This module is assumed to contain functions for setting up dataloaders, specifically <code>get_dataloaders_cifar10</code> for the CIFAR-10 dataset.</li>
+    <li><strong>models</strong>: This module provides choices for different models, and the required resolution for the chosen model is determined using the <code>model_choice</code> function.</li>
+    <li><strong>engine</strong>: This module provides two versions of training functions: <code>train_classifier_simple_v1</code> and <code>train_classifier_simple_v2</code>.</li>
+</ol>
+
+<h2>Getting Started</h2>
+<p>To run the training script:</p>
+<pre><code>python main.py</code></pre>
+<p>This will execute the entire workflow as defined in <code>main.py</code>, from loading data, setting up the model, to training.</p>
+
+<h2>Conclusion</h2>
+<p>This repository provides a straightforward way to train models on the CIFAR-10 dataset using PyTorch. With the modular setup and commented sections in the <code>main.py</code> script, it offers flexibility for experimentation with different models, optimizers, and training configurations.</p>
+
+</body>
+</html>
