@@ -11,9 +11,9 @@
 <h2>Overview</h2>
 <p>This repository contains scripts to train models on the CIFAR-10 dataset using PyTorch. The primary script, <code>main.py</code>, provides a comprehensive workflow from loading CIFAR-10 data, setting up models, and training them using various hyperparameters and optimization strategies.</p>
 
-![Model Output Overlayed with Image](https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png)
+![CIFAR-10-Visualization](https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png)
 
-
+![CIFAR-10 Database Toronto University](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz)
 
 <h2>Key Components</h2>
 
