@@ -11,6 +11,10 @@
 <h2>Overview</h2>
 <p>This repository contains scripts to train models on the CIFAR-10 dataset using PyTorch. The primary script, <code>main.py</code>, provides a comprehensive workflow from loading CIFAR-10 data, setting up models, and training them using various hyperparameters and optimization strategies.</p>
 
+![Model Output Overlayed with Image]([https://github.com/VenturaHaze/Solar_France/blob/b10afc533674a4496456138f3c04eb34fa8ca861/UNet_pretrained100_Epoch10_pred1.png](https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png))
+
+
+
 <h2>Key Components</h2>
 
 <h3>main.py</h3>
