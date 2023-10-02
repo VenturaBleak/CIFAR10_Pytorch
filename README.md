@@ -13,7 +13,7 @@
 
 ![CIFAR-10-Visualization](https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png)
 
-![CIFAR-10 Database Toronto University](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz)
+![CIFAR-10 Database Toronto University](https://www.cs.toronto.edu/~kriz/cifar.html)
 
 <h2>Key Components</h2>
 
