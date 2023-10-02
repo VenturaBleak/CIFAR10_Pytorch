@@ -16,6 +16,8 @@
 <img src="https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png" alt="CIFAR-10-Visualization">
 
 <h2>Dataset Classes</h2>
+
+<p>The CIFAR-10 Database provided by Toronto University<a href="https://www.cs.toronto.edu/~kriz/cifar.html" target="_blank">is accessible via this link.</a>
 <p>The CIFAR-10 dataset in this repository is categorized into the following classes:</p>
 <ul>
     <li>Airplane</li>
@@ -30,7 +32,20 @@
     <li>Truck</li>
 </ul>
 
-<a href="https://www.cs.toronto.edu/~kriz/cifar.html" target="_blank">CIFAR-10 Database Toronto University</a>
+<h3>Sample Images After Transformations</h3>
+<img src="https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/dd3dec5c9de3f58e1ee9438fd5c17569414f88da/sample_transformations.png" alt="Sample CIFAR-10 Images After Transformations">
+<p>This image showcases a sample of CIFAR-10 images after applying the data transformations used in the training process.</p>
+
+<h2>Repository Structure</h2>
+<p>The repository is structured with the following main scripts:</p>
+<ul>
+    <li><strong>data_setup.py</strong>: Handles data preparation and loading processes for CIFAR-10.</li>
+    <li><strong>engine.py</strong>: Contains core functionalities for the training loop of the classifier.</li>
+    <li><strong>eval.py</strong>: Manages model evaluation processes.</li>
+    <li><strong>main.py</strong>: The primary script for executing the model training workflow.</li>
+    <li><strong>metrics.py</strong>: Defines various metrics used for evaluating model performance.</li>
+    <li><strong>models.py</strong>: Provides model architectures and related utilities.</li>
+</ul>
 
 <h2>Repository Structure</h2>
 <p>The repository is structured with the following main scripts:</p>
