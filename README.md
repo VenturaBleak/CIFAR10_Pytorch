@@ -18,7 +18,7 @@
 <h2>Dataset Classes</h2>
 
 <p>The CIFAR-10 Database provided by Toronto University<a href="https://www.cs.toronto.edu/~kriz/cifar.html" target="_blank">is accessible via this link.</a>
-<p>The CIFAR-10 dataset in this repository is categorized into the following classes:</p>
+<p>The dataset contains the 10 following classes:</p>
 <ul>
     <li>Airplane</li>
     <li>Automobile</li>
