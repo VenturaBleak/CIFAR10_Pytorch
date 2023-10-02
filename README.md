@@ -11,9 +11,14 @@
 <h2>Overview</h2>
 <p>This repository contains scripts to train models on the CIFAR-10 dataset using PyTorch. The primary script, <code>main.py</code>, provides a comprehensive workflow from loading CIFAR-10 data, setting up models, and training them using various hyperparameters and optimization strategies.</p>
 
-![CIFAR-10-Visualization](https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png)
+<p>The model used for training in this repository is the Network In Network (NiN) model, which is based on <a href="https://arxiv.org/abs/1312.4400" target="_blank">this paper</a>.</p>
+
+<img src="https://github.com/VenturaHaze/CIFAR10_Pytorch/blob/993c01031709d2ceb06b4a5d57c0a185823f30f8/CIFAR-10-visualization.png" alt="CIFAR-10-Visualization">
 
 <a href="https://www.cs.toronto.edu/~kriz/cifar.html" target="_blank">CIFAR-10 Database Toronto University</a>
+
+<h2>Key Components</h2>
+<h1>CIFAR-10 Training Repository Documentation</h1>
 
 <h2>Key Components</h2>
 
